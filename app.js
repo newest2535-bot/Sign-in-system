@@ -8,11 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentCoordinates = null;
   let locationWatchId = null;
 
-  // Default Mock Employees
+  // Default Employees
   const defaultEmployees = [
-    { id: 'EMP001', name: 'สมชาย ใจดี' },
-    { id: 'EMP002', name: 'สมศรี รักดี' },
-    { id: 'EMP003', name: 'วิชัย มั่นคง' }
+    { id: 'AICHA01', name: 'แนน' },
+    { id: 'AICHA02', name: 'เจแปน' }
   ];
 
   // --- Element Selectors ---
@@ -86,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Theme Controller ---
   function initTheme() {
-    const savedTheme = localStorage.getItem('minima_theme') || 'light';
+    const savedTheme = localStorage.getItem('threealong_theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
   }
 
@@ -94,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('minima_theme', newTheme);
+    localStorage.setItem('threealong_theme', newTheme);
     showToast(`เปลี่ยนเป็นธีม ${newTheme === 'dark' ? 'มืด' : 'สว่าง'}`, 'info');
   });
 
@@ -103,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let employees = getStoredEmployees();
     if (!employees || employees.length === 0) {
       employees = defaultEmployees;
-      localStorage.setItem('minima_employees', JSON.stringify(employees));
+      localStorage.setItem('threealong_employees', JSON.stringify(employees));
     }
     renderEmployeeSelectOptions(employees);
     renderAdminEmployeeTable(employees);
@@ -111,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function getStoredEmployees() {
     try {
-      return JSON.parse(localStorage.getItem('minima_employees')) || [];
+      return JSON.parse(localStorage.getItem('threealong_employees')) || [];
     } catch {
       return [];
     }
@@ -175,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     employees.push({ id, name });
-    localStorage.setItem('minima_employees', JSON.stringify(employees));
+    localStorage.setItem('threealong_employees', JSON.stringify(employees));
     
     newEmpId.value = '';
     newEmpName.value = '';
@@ -187,17 +186,17 @@ document.addEventListener('DOMContentLoaded', () => {
   function deleteEmployee(empId) {
     let employees = getStoredEmployees();
     employees = employees.filter(emp => emp.id !== empId);
-    localStorage.setItem('minima_employees', JSON.stringify(employees));
+    localStorage.setItem('threealong_employees', JSON.stringify(employees));
     initEmployees();
     showToast('ลบข้อมูลพนักงานเรียบร้อยแล้ว', 'info');
   }
 
   // --- Google Sheets URL Config ---
   function initSettings() {
-    const defaultUrl = 'https://script.google.com/macros/s/AKfycbyXHGuum24HR1XYC4JIVLnyxeLoxla_Ug24FxoRuOwZvX_NiULMIez0we0a5-K4K_bV/exec';
-    let savedUrl = localStorage.getItem('minima_sheets_url');
+    const defaultUrl = 'https://script.google.com/macros/s/AKfycbzSoVWRd1VGFNV5--ZbY0OejF34JMAu4BJd23oIu0zCU4PKXBDIkqY9opKlpMgdCd1a6A/exec';
+    let savedUrl = localStorage.getItem('threealong_sheets_url');
     if (savedUrl === null || savedUrl === '' || !savedUrl.includes('/exec')) {
-      localStorage.setItem('minima_sheets_url', defaultUrl);
+      localStorage.setItem('threealong_sheets_url', defaultUrl);
       savedUrl = defaultUrl;
     }
     sheetsUrlInput.value = savedUrl;
@@ -226,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     
-    localStorage.setItem('minima_sheets_url', url);
+    localStorage.setItem('threealong_sheets_url', url);
     updateConnectionStatusUI(url);
     showToast('บันทึกการตั้งค่าแล้ว', 'success');
     closeModal();
@@ -298,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Session Management ---
   function checkSession() {
     try {
-      const savedSession = JSON.parse(localStorage.getItem('minima_session'));
+      const savedSession = JSON.parse(localStorage.getItem('threealong_session'));
       if (savedSession) {
         currentUser = savedSession;
         showScreen('dashboard');
@@ -332,13 +331,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     currentUser = { id, name };
-    localStorage.setItem('minima_session', JSON.stringify(currentUser));
+    localStorage.setItem('threealong_session', JSON.stringify(currentUser));
     
     // Proactively save to stored list if not exists
     const employees = getStoredEmployees();
     if (!employees.some(emp => emp.id === id)) {
       employees.push(currentUser);
-      localStorage.setItem('minima_employees', JSON.stringify(employees));
+      localStorage.setItem('threealong_employees', JSON.stringify(employees));
       initEmployees();
     }
 
@@ -348,7 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   logoutBtn.addEventListener('click', () => {
     currentUser = null;
-    localStorage.removeItem('minima_session');
+    localStorage.removeItem('threealong_session');
     showToast('ออกจากระบบเรียบร้อยแล้ว', 'info');
     showScreen('login');
     
@@ -526,7 +525,7 @@ document.addEventListener('DOMContentLoaded', () => {
     attendanceNotes.value = '';
 
     // If Google Sheet is set up, sync it
-    const sheetsUrl = localStorage.getItem('minima_sheets_url');
+    const sheetsUrl = localStorage.getItem('threealong_sheets_url');
     if (sheetsUrl) {
       showToast('กำลังส่งข้อมูลไปยัง Google Sheets...', 'info');
       
@@ -583,7 +582,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Local History Controller ---
   function getHistory() {
     try {
-      return JSON.parse(localStorage.getItem('minima_history')) || [];
+      return JSON.parse(localStorage.getItem('threealong_history')) || [];
     } catch {
       return [];
     }
@@ -592,7 +591,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function saveToLocalHistory(item) {
     const history = getHistory();
     history.unshift(item); // Add to beginning of array
-    localStorage.setItem('minima_history', JSON.stringify(history));
+    localStorage.setItem('threealong_history', JSON.stringify(history));
   }
 
   function loadLocalHistory() {
@@ -652,7 +651,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const history = getHistory();
       // Keep other users' history, clear only current user
       const filtered = history.filter(item => item.employeeId !== currentUser.id);
-      localStorage.setItem('minima_history', JSON.stringify(filtered));
+      localStorage.setItem('threealong_history', JSON.stringify(filtered));
       showToast('ล้างประวัติเสร็จสิ้น', 'info');
       loadLocalHistory();
     }
@@ -662,7 +661,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function openModal() {
     settingsModal.classList.add('active');
     initEmployees(); // Refresh employees display
-    sheetsUrlInput.value = localStorage.getItem('minima_sheets_url') || '';
+    sheetsUrlInput.value = localStorage.getItem('threealong_sheets_url') || '';
   }
 
   function closeModal() {
