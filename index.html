@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MINIMA | ระบบลงเวลาปฏิบัติงานมินิมอล</title>
+  <!-- Google Fonts: Outfit (English) & Prompt (Thai) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Prompt:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+  <!-- Lucide Icons for clean minimalist iconography -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Theme Toggle & Settings Shortcuts floating in top corner -->
+  <div class="top-actions" id="topActions" style="display: none;">
+    <button id="themeToggle" class="btn-icon" title="เปลี่ยนธีม">
+      <i data-lucide="sun" class="sun-icon"></i>
+      <i data-lucide="moon" class="moon-icon"></i>
+    </button>
+    <button id="settingsBtn" class="btn-icon" title="ตั้งค่าระบบ">
+      <i data-lucide="settings"></i>
+    </button>
+  </div>
+
+  <!-- Toast Container for notifications -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- App Container -->
+  <main class="app-container">
+
+    <!-- 1. LOGIN SCREEN -->
+    <section id="loginScreen" class="screen active">
+      <div class="login-card">
+        <div class="login-header">
+          <div class="logo-circle">
+            <i data-lucide="clock" class="logo-icon"></i>
+          </div>
+          <h1>MINIMA</h1>
+          <p>ระบบลงเวลาปฏิบัติงานพนักงาน</p>
+        </div>
+
+        <form id="loginForm" class="login-form">
+          <div class="form-group">
+            <label for="employeeSelect">เลือกรายชื่อพนักงาน</label>
+            <div class="select-wrapper">
+              <select id="employeeSelect" required>
+                <option value="" disabled selected>-- กรุณาเลือกชื่อของคุณ --</option>
+                <!-- Prepopulated via JS -->
+              </select>
+            </div>
+          </div>
+
+          <div class="divider-text">
+            <span>หรือระบุพนักงานใหม่</span>
+          </div>
+
+          <div class="form-group">
+            <label for="employeeId">รหัสพนักงาน</label>
+            <input type="text" id="employeeId" placeholder="เช่น EMP004" autocomplete="off">
+          </div>
+
+          <div class="form-group">
+            <label for="employeeName">ชื่อ-นามสกุล</label>
+            <input type="text" id="employeeName" placeholder="เช่น สมเกียรติ รักงาน" autocomplete="off">
+          </div>
+
+          <button type="submit" class="btn btn-primary w-full">
+            <span>เข้าสู่ระบบ</span>
+            <i data-lucide="arrow-right"></i>
+          </button>
+        </form>
+        
+        <div class="login-footer">
+          <p id="localModeLabel"><i data-lucide="info"></i> โหมดใช้งานภายในบราวเซอร์ (Offline)</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. DASHBOARD SCREEN -->
+    <section id="dashboardScreen" class="screen">
+      <!-- Navbar / User info -->
+      <header class="dashboard-header">
+        <div class="user-profile">
+          <div class="avatar-placeholder" id="userAvatar">M</div>
+          <div class="user-info">
+            <h2 id="displayUserName">ชื่อพนักงาน</h2>
+            <span id="displayUserId">EMP000</span>
+          </div>
+        </div>
+        
+        <div class="nav-controls">
+          <button id="dashboardSettingsBtn" class="btn-icon mobile-only" title="ตั้งค่า">
+            <i data-lucide="settings"></i>
+          </button>
+          <button id="logoutBtn" class="btn btn-secondary">
+            <i data-lucide="log-out"></i>
+            <span>ออกจากระบบ</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Layout Grid -->
+      <div class="dashboard-grid">
+        
+        <!-- Left Column: Clock and Actions -->
+        <div class="main-card-column">
+          
+          <!-- Clock Card -->
+          <div class="card card-clock">
+            <div class="card-tag">เวลาปัจจุบัน</div>
+            <div id="liveClock" class="clock-display">00:00:00</div>
+            <div id="liveDate" class="date-display">วันพุธที่ 3 มิถุนายน 2569</div>
+          </div>
+
+          <!-- Location Status Card -->
+          <div class="card card-location">
+            <div class="location-status-header">
+              <span class="card-tag">พิกัดสถานที่ปัจจุบัน</span>
+              <div id="locationDot" class="status-dot warning"></div>
+            </div>
+            
+            <div class="location-details">
+              <div class="location-icon-box">
+                <i data-lucide="map-pin" id="locationPinIcon" class="warning"></i>
+              </div>
+              <div class="location-info-text">
+                <div id="locationStatus" class="status-text">กำลังค้นหาพิกัด GPS...</div>
+                <div id="locationCoords" class="coordinates-text">Latitude: -- | Longitude: --</div>
+              </div>
+            </div>
+            
+            <button id="retryLocationBtn" class="btn btn-text btn-sm">
+              <i data-lucide="refresh-cw"></i> ดึงพิกัดอีกครั้ง
+            </button>
+            <button id="mockLocationBtn" class="btn btn-text btn-sm" style="color: var(--accent);">
+              <i data-lucide="navigation"></i> ใช้พิกัดจำลอง (กรุงเทพฯ)
+            </button>
+          </div>
+
+          <!-- Action Card -->
+          <div class="card card-actions">
+            <div class="card-tag">ลงบันทึกเวลา</div>
+            
+            <div class="notes-field">
+              <label for="attendanceNotes">บันทึกเพิ่มเติม (ตัวเลือก)</label>
+              <textarea id="attendanceNotes" rows="2" placeholder="เช่น ทำงานนอกสถานที่, ทำงานที่บ้าน, หมายเหตุอื่นๆ..."></textarea>
+            </div>
+            
+            <div class="action-buttons-group">
+              <button id="checkInBtn" class="btn btn-success btn-lg">
+                <i data-lucide="log-in"></i>
+                <div class="btn-lbl">
+                  <strong>ลงเวลาเข้างาน</strong>
+                  <span>Check In</span>
+                </div>
+              </button>
+              
+              <button id="checkOutBtn" class="btn btn-danger btn-lg">
+                <i data-lucide="log-out"></i>
+                <div class="btn-lbl">
+                  <strong>ลงเวลาออกงาน</strong>
+                  <span>Check Out</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Status and Today's History -->
+        <div class="side-card-column">
+          
+          <!-- Today's Status Summary -->
+          <div class="card card-status">
+            <div class="card-tag">สถานะวันนี้</div>
+            <div class="status-summary-grid">
+              <div class="status-metric checkin">
+                <span class="label">เวลาเข้างาน</span>
+                <span class="value" id="todayCheckInTime">--:--</span>
+              </div>
+              <div class="status-metric checkout">
+                <span class="label">เวลาออกงาน</span>
+                <span class="value" id="todayCheckOutTime">--:--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Log History Table Card -->
+          <div class="card card-history">
+            <div class="history-header">
+              <h3 class="card-tag">ประวัติลงเวลารายบุคคล</h3>
+              <button id="clearLocalHistoryBtn" class="btn btn-text text-danger btn-sm" title="ล้างประวัติเฉพาะเครื่องนี้">
+                <i data-lucide="trash-2"></i> ล้างประวัติ
+              </button>
+            </div>
+            
+            <div class="history-list-wrapper">
+              <div id="noHistoryMsg" class="no-data">
+                <i data-lucide="clipboard-list"></i>
+                <p>ยังไม่มีประวัติการลงเวลาในเครื่องนี้</p>
+              </div>
+              <ul id="historyList" class="history-list">
+                <!-- Log Items injected here -->
+              </ul>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 3. SETTINGS MODAL -->
+  <div id="settingsModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2><i data-lucide="settings"></i> ตั้งค่าการเชื่อมต่อ</h2>
+        <button id="closeSettingsBtn" class="btn-close">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <!-- Tab navigation if needed, keeping it simple first -->
+        <div class="settings-section">
+          <h3>เชื่อมต่อ Google Sheets</h3>
+          <p class="section-desc">บันทึกข้อมูลเวลาทำงานลงบน Google Sheet โดยตรงแบบเรียลไทม์ โดยแยกแท็บตามเดือนโดยอัตโนมัติ</p>
+          
+          <div class="form-group">
+            <label for="sheetsUrlInput">Google Apps Script Web App URL</label>
+            <input type="url" id="sheetsUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
+            <span class="help-text">นำ URL ที่ได้จากการ Deploy Web App บน Apps Script มาใส่อันนี้</span>
+          </div>
+
+          <div class="settings-status-box" id="sheetsConnectionStatus">
+            <div class="status-indicator-dot offline" id="connIndicator"></div>
+            <span id="connStatusText">สถานะการเชื่อมต่อ: ทำงานในเครื่อง (Local Storage เท่านั้น)</span>
+          </div>
+          
+          <div class="button-row">
+            <button id="testSheetsBtn" class="btn btn-secondary btn-sm">
+              <i data-lucide="activity"></i> ทดสอบการเชื่อมต่อ
+            </button>
+            <button id="saveSettingsBtn" class="btn btn-primary btn-sm">บันทึกตั้งค่า</button>
+          </div>
+        </div>
+
+        <hr class="modal-divider">
+
+        <div class="settings-section">
+          <h3>จัดการพนักงาน</h3>
+          <p class="section-desc">เพิ่มรายชื่อพนักงานเพื่อให้สะดวกในการเข้าสู่ระบบที่หน้าแรก</p>
+          
+          <div class="add-employee-form">
+            <input type="text" id="newEmpId" placeholder="รหัส เช่น EMP004" style="flex: 1;">
+            <input type="text" id="newEmpName" placeholder="ชื่อ-นามสกุลพนักงาน" style="flex: 2;">
+            <button id="addEmpBtn" class="btn btn-secondary btn-sm">
+              <i data-lucide="plus"></i> เพิ่ม
+            </button>
+          </div>
+
+          <div class="employee-list-wrapper">
+            <table class="emp-table">
+              <thead>
+                <tr>
+                  <th>รหัส</th>
+                  <th>ชื่อ-นามสกุล</th>
+                  <th>จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="adminEmployeeTableBody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <hr class="modal-divider">
+        
+        <div class="settings-section">
+          <h3>คำแนะนำการติดตั้ง Google Sheets</h3>
+          <div class="guide-box">
+            <p>1. สร้างไฟล์ Google Sheet ใหม่ในบัญชี Google ของคุณ</p>
+            <p>2. กดที่เมนู <strong>ส่วนขยาย (Extensions)</strong> &gt; <strong>Apps Script</strong></p>
+            <p>3. คัดลอกโค้ดจากไฟล์ <code>apps_script.js</code> ไปวางแทนโค้ดทั้งหมดในหน้าต่างนั้น</p>
+            <p>4. กดปุ่มบันทึก (แผ่นดิสก์) จากนั้นกดปุ่ม <strong>การใช้งาน (Deploy)</strong> &gt; <strong>การปรับใช้ใหม่ (New deployment)</strong></p>
+            <p>5. เลือกประเภทเป็น <strong>เว็บแอป (Web app)</strong></p>
+            <p>6. กำหนดผู้มีสิทธิ์เข้าถึงเป็น <strong>ทุกคน (Anyone)</strong> และกด **ปรับใช้ (Deploy)**</p>
+            <p>7. คัดลอก URL ของเว็บแอปมาใส่ในช่องตั้งค่าด้านบน</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
